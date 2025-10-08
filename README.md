@@ -12,8 +12,8 @@
 
 **MAPS** is a computational framework for testing whether visual explanations from deep neural networks capture human-like and primate-like visual strategies.  
 The repository provides all scripts and notebooks to:  
-- 🧠 Fine-tune models on an object-recognition dataset  
-- 🌈 Generate attribution maps and **Explanation-Manipulated Inputs (EMIs)**  
+- 𝌭 Fine-tune models on an object-recognition dataset  
+- 🌈 Generate attribution maps and **Explanation-Masked Inputs (EMIs)**  
 - 📊 Compute behavioral metrics (**B.I1**) and correlations with humans, monkeys, and neurons  
 - 🔍 Compare attribution methods and assess explanation similarity (L1, L2, LPIPS)  
 - 📈 Reproduce all figures and analyses from the MAPS paper  
@@ -75,14 +75,14 @@ You can replace `convnext` with the best model assessed above and `NoiseTunnel_S
 
 ---
 
-### **4️⃣ Generate EMIs (Explanation-Manipulated Inputs)**
+### **4️⃣ Generate EMIs (Explanation-Masked Inputs)**
 Perturb images based on attribution maps:
 
 ```bash
 python generate_emis.py convnext NoiseTunnel_Saliency
 ```
 
-As above, you can replace `convnext` with the best model assessed above and `NoiseTunnel_Saliency` with any Captum method.
+As mentioned above, you can replace `convnext` with the best model evaluated earlier and `NoiseTunnel_Saliency` with any Captum method.
 
 ---
 
