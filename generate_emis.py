@@ -8,8 +8,6 @@ import numpy as np
 import timm
 import sys
 
-
-# 3. Generate Attribution Maps
 attribution_methods = {
     'Saliency': Saliency,
     'NoiseTunnel_Saliency': lambda model: NoiseTunnel(Saliency(model)),
