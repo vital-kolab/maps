@@ -101,45 +101,46 @@ pattern_emi = re.compile(r'pEMI_(\d+)\.npy')
 os.makedirs('./behavioral_responses', exist_ok=True)
 
 ref_model_name = sys.argv[1]
-percentile = sys.argv[2]
-method_name = sys.argv[3]
+method_name = sys.argv[2]
+percentiles = [50, 60, 65, 70, 75, 80, 85, 90, 95, 97, 98, 99]
 print("Ref", ref_model_name)
     
-for target_model_name, target_model in models_dict.items():
-    print("Target", target_model_name)
-    target_model.eval()
-    target_model.to(device)
-    
-    emis_dir = f'./perturbed_images/{ref_model_name}/{method_name}/{percentile}'
-    print(os.listdir(emis_dir))
-    emis_files = sorted(
-        [f for f in os.listdir(emis_dir) if pattern_emi.match(f)],
-        key=lambda x: int(pattern_emi.match(x).group(1))
-    )
-    
-    all_outputs_ref = []
-    all_outputs_target = []
-
-    # Save behavioral responses and i1 scores progressively
-    response_dir = f'./behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
-    if not os.path.exists(f"{response_dir}/{target_model_name}_i1.json"):
-        os.makedirs(response_dir, exist_ok=True)
-        for file in emis_files:
-            EMI_tensor = torch.tensor(np.load(os.path.join(emis_dir, file))).unsqueeze(0).to(device)
-
-            output_target = target_model(EMI_tensor).softmax(dim=1).detach().cpu().numpy().tolist()
-
-            all_outputs_target.append(output_target)
-
-        print(len(all_outputs_target))
-        i1_scores = {
-            'target_pEMI': create_i1_test(np.vstack(all_outputs_target), target_model_name).tolist()
-        }
+for percentile in percentiles:
+    for target_model_name, target_model in models_dict.items():
+        print("Target", target_model_name)
+        target_model.eval()
+        target_model.to(device)
         
-        with open(f'{response_dir}/{target_model_name}_behavioral.json', 'w') as f:
-            json.dump({
-                'target_pEMI': all_outputs_target,
-            }, f)
+        emis_dir = f'./perturbed_images/{ref_model_name}/{method_name}/{percentile}'
+        print(os.listdir(emis_dir))
+        emis_files = sorted(
+            [f for f in os.listdir(emis_dir) if pattern_emi.match(f)],
+            key=lambda x: int(pattern_emi.match(x).group(1))
+        )
+        
+        all_outputs_ref = []
+        all_outputs_target = []
 
-        with open(f'{response_dir}/{target_model_name}_i1.json', 'w') as f:
-            json.dump(i1_scores, f)
+        # Save behavioral responses and i1 scores progressively
+        response_dir = f'./behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
+        if not os.path.exists(f"{response_dir}/{target_model_name}_i1.json"):
+            os.makedirs(response_dir, exist_ok=True)
+            for file in emis_files:
+                EMI_tensor = torch.tensor(np.load(os.path.join(emis_dir, file))).unsqueeze(0).to(device)
+
+                output_target = target_model(EMI_tensor).softmax(dim=1).detach().cpu().numpy().tolist()
+
+                all_outputs_target.append(output_target)
+
+            print(len(all_outputs_target))
+            i1_scores = {
+                'target_pEMI': create_i1_test(np.vstack(all_outputs_target), target_model_name).tolist()
+            }
+            
+            with open(f'{response_dir}/{target_model_name}_behavioral.json', 'w') as f:
+                json.dump({
+                    'target_pEMI': all_outputs_target,
+                }, f)
+
+            with open(f'{response_dir}/{target_model_name}_i1.json', 'w') as f:
+                json.dump(i1_scores, f)

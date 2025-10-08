@@ -74,17 +74,15 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, s
 
 
 model_name = sys.argv[1]
-print(model_name)
-for method_name in attribution_methods.keys():
-    print(method_name)
-    for percentile in percentiles:
-        save_dir = f'./perturbed_images/{model_name}/{method_name}/{percentile}'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir, exist_ok=True)
-            
-            for idx, (inputs, labels) in enumerate(test_loader):
-                for i in range(inputs.size(0)):
-                    attr_map = np.load(f"./attribution_maps/{model_name}/{method_name}/image_{idx * test_loader.batch_size + i}.npy") 
-                    pEMI = generate_perturbed_images(inputs[i], attr_map, percentile, positive=True)
+method_name = sys.argv[2]
+for percentile in percentiles:
+    save_dir = f'./perturbed_images/{model_name}/{method_name}/{percentile}'
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir, exist_ok=True)
+        
+        for idx, (inputs, labels) in enumerate(test_loader):
+            for i in range(inputs.size(0)):
+                attr_map = np.load(f"./attribution_maps/{model_name}/{method_name}/image_{idx * test_loader.batch_size + i}.npy") 
+                pEMI = generate_perturbed_images(inputs[i], attr_map, percentile, positive=True)
 
-                    np.save(f'{save_dir}/pEMI_{idx * test_loader.batch_size + i}.npy', pEMI)
+                np.save(f'{save_dir}/pEMI_{idx * test_loader.batch_size + i}.npy', pEMI)
