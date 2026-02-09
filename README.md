@@ -22,14 +22,13 @@ Precomputed data and psychophysics datasets are publicly hosted on the [Open Sci
 
 ---
 
-## ⚙️ Installation  
+## ⚙️ Installation  (< 5 mins)
 
 ```bash
 git clone https://github.com/vital-kolab/maps.git
 cd maps
-conda create -n maps python=3.10
+conda create -n maps python=3.10 numpy=1.26.4 scipy=1.15.3 scikit-learn=1.7.1 matplotlib=3.10.8 h5py=3.14.0
 conda activate maps
-pip install -r requirements.txt
 ```
 
 GPU acceleration (CUDA) is recommended for attribution generation.
@@ -38,7 +37,7 @@ GPU acceleration (CUDA) is recommended for attribution generation.
 
 ## 🚀 Quickstart Pipeline  
 
-### **1️⃣ Fine-tune models**
+### **1️⃣ Fine-tune models (5 mins per model on a single GPU) **
 Train the selected architectures on your dataset:
 
 ```bash
@@ -50,7 +49,7 @@ python finetune_models.py
 
 ---
 
-### **2️⃣ Select the best model**
+### **2️⃣ Select the best model** (< 2 mins)
 Determine which model best matches human behavior:
 
 ```bash
@@ -64,7 +63,7 @@ jupyter notebook get_best_model.ipynb
 
 ---
 
-### **3️⃣ Generate explanations**
+### **3️⃣ Generate explanations** (200 images on a single GPU: 3 mins for ConvNext and NoiseTunnel Saliency, > 20 hours for Feature Ablation/Permutation)
 Compute attribution maps for your model:
 
 ```bash
@@ -75,7 +74,7 @@ You can replace `convnext` with the best model assessed above and `NoiseTunnel_S
 
 ---
 
-### **4️⃣ Generate EMIs (Explanation-Masked Inputs)**
+### **4️⃣ Generate EMIs (Explanation-Masked Images)** (5 mins)
 Perturb images based on attribution maps:
 
 ```bash
@@ -86,7 +85,7 @@ As mentioned above, you can replace `convnext` with the best model evaluated ear
 
 ---
 
-### **5️⃣ Compute behavioral metrics (B.I1)**
+### **5️⃣ Compute behavioral metrics (B.I1)** (10 mins)
 Evaluate model behavior on EMIs:
 
 ```bash
@@ -98,7 +97,7 @@ As above, you can replace `convnext` with the best model assessed above and `Noi
 
 ---
 
-### **6️⃣ Compare models, humans, and monkeys**
+### **6️⃣ Compare models, humans, and monkeys** (< 2 mins)
 Use the provided notebooks for main analyses:
 
 | Notebook | Description |
@@ -108,7 +107,7 @@ Use the provided notebooks for main analyses:
 
 ---
 
-### **(Optional) Identify the best attribution method**
+### **(Optional) Identify the best attribution method** (< 2 mins)
 Generate Explanations, EMIs and Behavioral metrics for all explanation methods and all models, then run:
 
 ```
@@ -121,7 +120,7 @@ This notebook identifies the attribution method that leads to the highest refere
 
 ## 📚 Additional Analyses  
 
-Reproduce all extended results and figures from the paper:
+Reproduce all results and figures from the paper:
 
 | Notebook | Purpose |
 |-----------|----------|
