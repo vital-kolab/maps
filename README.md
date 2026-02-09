@@ -37,7 +37,7 @@ GPU acceleration (CUDA) is recommended for attribution generation.
 
 ## 🚀 Quickstart Pipeline  
 
-### **1️⃣ Fine-tune models (5 mins per model on a single GPU) **
+### **1️⃣ Fine-tune models** (5 mins per model on a single GPU)
 Train the selected architectures on your dataset:
 
 ```bash
