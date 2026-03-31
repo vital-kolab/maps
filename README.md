@@ -86,7 +86,7 @@ To visualize the resulting explanations:
 jupyter notebook visualize_explanations.ipynb
 ```
 
-Pre-generated attribution maps from `convnext` are provided in the OSF directory.
+Pre-generated attribution maps from all models/methods are provided in the OSF directory.
 
 ---
 
