@@ -29,7 +29,7 @@ git clone https://github.com/vital-kolab/maps.git
 cd maps
 python -m venv maps_env
 source maps_env/bin/activate
-pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas captum
+pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas captum lpips
 ```
 
 GPU acceleration (CUDA) is recommended for attribution generation.
