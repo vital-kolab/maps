@@ -27,8 +27,9 @@ Precomputed data and psychophysics datasets are publicly hosted on the [Open Sci
 ```bash
 git clone https://github.com/vital-kolab/maps.git
 cd maps
-conda create -n maps python=3.10 numpy=1.26.4 scipy=1.15.3 scikit-learn=1.7.1 matplotlib=3.10.8 h5py=3.14.0
-conda activate maps
+python -m venv maps_env
+source maps_env/bin/activate
+pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas
 ```
 
 GPU acceleration (CUDA) is recommended for attribution generation.
@@ -37,29 +38,37 @@ GPU acceleration (CUDA) is recommended for attribution generation.
 
 ## 🚀 Quickstart Pipeline  
 
-### **1️⃣ Fine-tune models** (5 mins per model on a single GPU)
-Train the selected architectures on your dataset:
+### **1️⃣ Fine-tune and tests models** (5 mins per model on a single GPU)
 
+Train the selected architectures on your dataset:
 ```bash
 python finetune_models.py
 ```
 
-- By default, the script uses the dataset in `./coco200/`.  
-- To use your own data, change `"coco200"` to your dataset folder name.
+Then test the finetuned models in the same way as humans on the 2AFC task:
+```bash
+jupyter notebook test_models.ipynb
+```
+
+- By default, the scripts uses the datasets in `./coco1400_per_class/` (training) and `./coco200_per_class/` (test).  
+- To use your own data, change `./coco1400_per_class/` and `./coco200_per_class/` to your dataset folder name.
 
 ---
 
 ### **2️⃣ Select the best model** (< 2 mins)
-Determine which model best matches human behavior:
 
+Determine which model best matches human behavior:
 ```bash
 jupyter notebook get_best_model.ipynb
 ```
 
-- To use your own human data, place your files in:  
+- To ensure proper cross-validation throughout the paper, we used an additional dataset to identify the best model (images not provided but model and human behavior in the OSF directory)
+- To use your own data, place your files in:  
   ```
   behavioral_responses/humans/
+  behavioral_responses/{model}/
   ```
+  where `model` is the name of each model within the pipeline
 
 ---
 
