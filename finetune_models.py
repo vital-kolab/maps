@@ -11,6 +11,8 @@ batch_size = 32
 image_size = 224
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+out_dir = "./models"
+os.makedirs(out_dir, exist_ok=True)
 
 transform = transforms.Compose([
     transforms.Resize((image_size, image_size)),
@@ -18,10 +20,10 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-train_dataset = datasets.ImageFolder(root=f'coco1400_perclass', transform=transform)
+train_dataset = datasets.ImageFolder(root=f'./coco1400_perclass', transform=transform)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-test_dataset = datasets.ImageFolder(root=f'coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -107,4 +109,4 @@ for model_name, model in models_dict.items():
     models_dict[model_name] = model
 
 for model_name, model in models_dict.items():
-    torch.save(model.state_dict(), f'models/{model_name}_fine_tuned.pth')
+    torch.save(model.state_dict(), f'{out_dir}/{model_name}_fine_tuned.pth')

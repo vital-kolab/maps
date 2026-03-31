@@ -9,12 +9,12 @@ def get_percent_correct_from_proba(prob, labels,class_order, eps=1e-3):
     _,ind = np.unique(labels, return_index=True)
     class_order=labels[np.sort(ind)] #np.unique(labels)
     pc = np.zeros((nrImages,len(class_order)))
-    pc[:]=np.NAN
+    pc[:]=np.nan
     
     for i in range(nrImages):
         loc_target = labels[i]==class_order
         pc[i,:] = np.divide(prob[i,labels[i]==class_order]+eps,(prob[i,:]+eps)+(prob[i,loc_target]+eps)) #+eps
-        pc[i,loc_target]=np.NAN
+        pc[i,loc_target]=np.nan
     return pc
 
 def create_i1_test(new_features, nrImages=200, eps=1e-5):
@@ -22,7 +22,7 @@ def create_i1_test(new_features, nrImages=200, eps=1e-5):
     labels = np.repeat(lb, nrImages // len(lb), axis=0)
 
     i1 = np.zeros((nrImages), dtype=float)
-    i1[:] = np.NAN
+    i1[:] = np.nan
 
     pc = get_percent_correct_from_proba(new_features, labels, np.array(lb), eps)
     i1[:] = np.nanmean(pc, axis=1)
