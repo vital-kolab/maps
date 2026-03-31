@@ -66,7 +66,7 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-test_dataset = datasets.ImageFolder(root=f'coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -84,3 +84,5 @@ for percentile in percentiles:
                 pEMI = generate_perturbed_images(inputs[i], attr_map, percentile, positive=True)
 
                 np.save(f'{save_dir}/pEMI_{idx * test_loader.batch_size + i}.npy', pEMI)
+
+    print(f"Percentile {percentile} done")

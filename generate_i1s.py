@@ -10,7 +10,7 @@ import sys
 import json
 import re
 import sys
-from utils import create_i1_test
+from maps_utils import create_i1_test
 
 num_classes = 10
 batch_size = 32
@@ -41,19 +41,21 @@ attribution_methods = {
 }
 
 
+models_dir = "./models"
+
 # Paths to saved models
 model_paths = {
-    'resnet50': 'models/resnet50_fine_tuned.pth',
-    'resnet18': 'models/resnet18_fine_tuned.pth',
-    'alexnet': 'models/alexnet_fine_tuned.pth',
-    'convnext': 'models/convnext_fine_tuned.pth',
-    'vgg19': 'models/vgg19_fine_tuned.pth',
-    'vgg16': 'models/vgg16_fine_tuned.pth',
-    'vit': 'models/vit_fine_tuned.pth',
-    'vit_ssl': 'models/vit_ssl_fine_tuned.pth',
-    'resnet_ssl': 'models/resnet_ssl_fine_tuned.pth',
-    'efficientnet': 'models/efficientnet_fine_tuned.pth',
-    'swin': 'models/swin_fine_tuned.pth'
+    'resnet50': f'{models_dir}/resnet50_fine_tuned.pth',
+    'resnet18': f'{models_dir}/resnet18_fine_tuned.pth',
+    'alexnet': f'{models_dir}/alexnet_fine_tuned.pth',
+    'convnext': f'{models_dir}/convnext_fine_tuned.pth',
+    'vgg19': f'{models_dir}/vgg19_fine_tuned.pth',
+    'vgg16': f'{models_dir}/vgg16_fine_tuned.pth',
+    'vit': f'{models_dir}/vit_fine_tuned.pth',
+    'vit_ssl': f'{models_dir}/vit_ssl_fine_tuned.pth',
+    'resnet_ssl': f'{models_dir}/resnet_ssl_fine_tuned.pth',
+    'efficientnet': f'{models_dir}/efficientnet_fine_tuned.pth',
+    'swin': f'{models_dir}/swin_fine_tuned.pth'
 }
 
 # Initialize models with pretrained weights
@@ -92,7 +94,7 @@ for model_name, model in models_dict.items():
 print("Models successfully loaded and ready for inference!")
 
 # Custom sorting to ensure numerical order if filenames don't have leading zeros
-test_dataset = datasets.ImageFolder(root=f'coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -134,7 +136,7 @@ for percentile in percentiles:
 
             print(len(all_outputs_target))
             i1_scores = {
-                'target_pEMI': create_i1_test(np.vstack(all_outputs_target), target_model_name).tolist()
+                'target_pEMI': create_i1_test(np.vstack(all_outputs_target)).tolist()
             }
             
             with open(f'{response_dir}/{target_model_name}_behavioral.json', 'w') as f:
@@ -144,3 +146,5 @@ for percentile in percentiles:
 
             with open(f'{response_dir}/{target_model_name}_i1.json', 'w') as f:
                 json.dump(i1_scores, f)
+                
+    print(f"Percentile {percentile} done")
