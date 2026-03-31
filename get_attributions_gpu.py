@@ -28,23 +28,25 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-test_dataset = datasets.ImageFolder(root='coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root='./coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
+models_dir = "./models"
+
 # Load model
 model_paths = {
-    'resnet50': 'models/resnet50_fine_tuned.pth',
-    'resnet18': 'models/resnet18_fine_tuned.pth',
-    'alexnet': 'models/alexnet_fine_tuned.pth',
-    'convnext': 'models/convnext_fine_tuned.pth',
-    'vgg19': 'models/vgg19_fine_tuned.pth',
-    'vgg16': 'models/vgg16_fine_tuned.pth',
-    'vit': 'models/vit_fine_tuned.pth',
-    'vit_ssl': 'models/vit_ssl_fine_tuned.pth',
-    'resnet_ssl': 'models/resnet_ssl_fine_tuned.pth',
-    'efficientnet': 'models/efficientnet_fine_tuned.pth',
-    'swin': 'models/swin_fine_tuned.pth'
+    'resnet50': f'{models_dir}/resnet50_fine_tuned.pth',
+    'resnet18': f'{models_dir}/resnet18_fine_tuned.pth',
+    'alexnet': f'{models_dir}/alexnet_fine_tuned.pth',
+    'convnext': f'{models_dir}/convnext_fine_tuned.pth',
+    'vgg19': f'{models_dir}/vgg19_fine_tuned.pth',
+    'vgg16': f'{models_dir}/vgg16_fine_tuned.pth',
+    'vit': f'{models_dir}/vit_fine_tuned.pth',
+    'vit_ssl': f'{models_dir}/vit_ssl_fine_tuned.pth',
+    'resnet_ssl': f'{models_dir}/resnet_ssl_fine_tuned.pth',
+    'efficientnet': f'{models_dir}/efficientnet_fine_tuned.pth',
+    'swin': f'{models_dir}/swin_fine_tuned.pth'
 }
 
 models_dict = {
@@ -112,60 +114,52 @@ for model_name, model in models_dict.items():
         for param in model.head.parameters():
             param.requires_grad = True
 
-def generate_attributions(model, method, input_image, target_class, model_name):
-    model.eval()
-    input_image = input_image.unsqueeze(0).to(device)
+def generate_attributions(method_instance, input_batch, target_batch):
+    input_batch = input_batch.to(device)
+    target_batch = target_batch.to(device)
 
-    if method == GradientShap:
-        method_instance = method(model)
-        # Create random baseline distribution (e.g., random noise centered around zero)
+    if isinstance(method_instance, GradientShap):
         baseline_dist = torch.cat([
-            input_image * 0,
-            input_image * 0.5,
-            torch.randn_like(input_image) * 0.001
+            torch.zeros_like(input_batch),
+            input_batch * 0.5,
+            torch.randn_like(input_batch) * 0.001
         ], dim=0).to(device)
         attribution = method_instance.attribute(
-            input_image, 
-            baselines=baseline_dist, 
-            target=target_class, 
-            n_samples=50  # Number of samples for approximation
+            input_batch,
+            baselines=baseline_dist,
+            target=target_batch,
+            n_samples=50
         )
-        return attribution.squeeze().detach().cpu().numpy()
-    
-    elif method == Occlusion:
-        method_instance = method(model)
-        # Set sliding window shapes and strides for occlusion
-        attribution = method_instance.attribute(
-            input_image,
-            strides=(1, 8, 8),  # Example stride values (adjust based on input size)
-            sliding_window_shapes=(1, 15, 15),  # Window size for occlusion
-            target=target_class
-        )
-        return attribution.squeeze().detach().cpu().numpy()
 
-    elif method == FeatureAblation or method == FeaturePermutation:
-        method_instance = method(model)
-        # Set sliding window shapes and strides for occlusion
+    elif isinstance(method_instance, Occlusion):
         attribution = method_instance.attribute(
-            input_image,
-            target=target_class,
+            input_batch,
+            strides=(1, 8, 8),
+            sliding_window_shapes=(3, 15, 15),
+            target=target_batch
+        )
+
+    elif isinstance(method_instance, (FeatureAblation, FeaturePermutation)):
+        attribution = method_instance.attribute(
+            input_batch,
+            target=target_batch,
             perturbations_per_eval=32
         )
-        return attribution.squeeze().detach().cpu().numpy()
-    
-    # Handle NoiseTunnel-wrapped methods (e.g., SmoothGrad)
-    else:
-        method_instance = method(model)
-        if isinstance(method_instance, NoiseTunnel):
-            attribution = method_instance.attribute(
-                input_image, 
-                nt_type='smoothgrad', 
-                target=target_class
-            )
-        else:
-            attribution = method_instance.attribute(input_image, target=target_class)
 
-    return attribution.squeeze().detach().cpu().numpy()
+    elif isinstance(method_instance, NoiseTunnel):
+        attribution = method_instance.attribute(
+            input_batch,
+            nt_type='smoothgrad',
+            target=target_batch
+        )
+
+    else:
+        attribution = method_instance.attribute(
+            input_batch,
+            target=target_batch
+        )
+
+    return attribution.detach().cpu().numpy()
 
 
 # Load fine-tuned weights
@@ -190,7 +184,7 @@ attribution_methods = {
     'FeaturePermutation': FeaturePermutation
 }
 
-method = attribution_methods[args.method_name](model)
+method_instance = attribution_methods[args.method_name](model)
 
 # Generate and save attributions
 save_dir = f'./attribution_maps/{args.model_name}/{args.method_name}'
@@ -201,12 +195,12 @@ for idx, (inputs, labels) in enumerate(test_loader):
     inputs = inputs.to(device)
     labels = labels.to(device)
 
-    # Generate attributions for the entire batch
-    attributions_batch = generate_attributions(model, method, inputs, labels, model_name)
+    attributions_batch = generate_attributions(method_instance, inputs, labels)
 
-    # Save each attribution in the batch
     for i in range(inputs.size(0)):
-        attribution = attributions_batch[i].squeeze().detach().cpu().numpy()
-        np.save(f'{save_dir}/image_{idx * test_loader.batch_size + i}.npy', attribution)
+        np.save(
+            f'{save_dir}/image_{idx * test_loader.batch_size + i}.npy',
+            attributions_batch[i].squeeze()
+        )
 
 print(f"Attributions for {args.model_name} using {args.method_name} saved successfully!")
