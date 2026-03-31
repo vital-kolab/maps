@@ -29,7 +29,7 @@ git clone https://github.com/vital-kolab/maps.git
 cd maps
 python -m venv maps_env
 source maps_env/bin/activate
-pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas
+pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas captum
 ```
 
 GPU acceleration (CUDA) is recommended for attribution generation.
@@ -62,7 +62,7 @@ Determine which model best matches human behavior:
 jupyter notebook get_best_model.ipynb
 ```
 
-- To ensure proper cross-validation throughout the paper, we used an additional dataset to identify the best model (images not provided but model and human behavior in the OSF directory)
+- To ensure proper cross-validation throughout the paper, we used an additional dataset to identify the best model (images not provided but model and human behavior in the OSF directory).
 - To use your own data, place your files in:  
   ```
   behavioral_responses/humans/
@@ -72,7 +72,7 @@ jupyter notebook get_best_model.ipynb
 
 ---
 
-### **3️⃣ Generate explanations** (200 images on a single GPU: 3 mins for ConvNext and NoiseTunnel Saliency, > 20 hours for Feature Ablation/Permutation)
+### **3️⃣ Generate explanations** (200 images on a single GPU: 2 mins for ConvNext and NoiseTunnel Saliency, > 20 hours for Feature Ablation/Permutation)
 Compute attribution maps for your model:
 
 ```bash
@@ -80,6 +80,13 @@ python get_attributions_gpu.py --model_name convnext --method_name NoiseTunnel_S
 ```
 
 You can replace `convnext` with the best model assessed above and `NoiseTunnel_Saliency` with any Captum method.
+
+To visualize the resulting explanations:
+```bash
+jupyter notebook visualize_explanations.ipynb
+```
+
+Pre-generated attribution maps from `convnext` are provided in the OSF directory.
 
 ---
 
