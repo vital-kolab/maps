@@ -111,6 +111,8 @@ This produces per-image behavioral vectors used to compare models, humans, and m
 
 As above, you can replace `convnext` with the best model assessed above and `NoiseTunnel_Saliency` with any Captum method.
 
+All behavioral metrics are provided in the OSF directory.
+
 ---
 
 ### **6️⃣ Compare models, humans, and monkeys** (< 2 mins)
