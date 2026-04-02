@@ -29,7 +29,7 @@ git clone https://github.com/vital-kolab/maps.git
 cd maps
 python -m venv maps_env
 source maps_env/bin/activate
-pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas captum lpips
+pip install ipykernel numpy scipy scikit-learn matplotlib h5py torch torchvision timm pandas captum lpips reverse_pred
 ```
 
 GPU acceleration (CUDA) is recommended for attribution generation.
@@ -80,6 +80,10 @@ python get_attributions_gpu.py --model_name convnext --method_name NoiseTunnel_S
 ```
 
 You can replace `convnext` with the best model assessed above and `NoiseTunnel_Saliency` with any Captum method.
+To generate all the explanations from all 11 models and 12 methods, run 
+```bash
+bash run_attributions.sh
+```
 
 To visualize the resulting explanations:
 ```bash
@@ -98,6 +102,10 @@ python generate_emis.py convnext NoiseTunnel_Saliency
 ```
 
 As mentioned above, you can replace `convnext` with the best model evaluated earlier and `NoiseTunnel_Saliency` with any Captum method.
+To generate all the EMIs from all 11 models and 12 methods, run 
+```bash
+bash run_emis.sh
+```
 
 ---
 
@@ -110,6 +118,10 @@ python generate_i1s.py convnext NoiseTunnel_Saliency
 This produces per-image behavioral vectors used to compare models, humans, and monkeys.
 
 As above, you can replace `convnext` with the best model assessed above and `NoiseTunnel_Saliency` with any Captum method.
+To generate all the EMIs from all 11 models and 12 methods, run 
+```bash
+bash run_i1s.sh
+```
 
 All behavioral metrics are provided in the OSF directory.
 
