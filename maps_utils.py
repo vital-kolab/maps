@@ -204,3 +204,13 @@ def journal_figure(do_save=False, filename='figure.eps', dpi=300, size_inches=(2
     if do_save:
         # Save the figure
         plt.savefig(filename, dpi=dpi, bbox_inches='tight', format='eps', linewidth=linewidth)
+
+def average_data(f, start, end, max_t=260, bin_size=10):
+
+    time = np.arange(0, max_t, bin_size)
+
+    start_idx = np.where(time == start)[0][0]
+    end_idx = np.where(time == end)[0][0] + 1
+
+    averaged_rates = np.nanmean(f[start_idx:end_idx, :, :, :], axis=0)
+    return averaged_rates

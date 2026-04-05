@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 # Setup device
 device = torch.device(f'cuda:{args.device}' if torch.cuda.is_available() else 'cpu')
-
+base_dir = "."
 # Dataset preparation
 num_classes = 10
 batch_size = 32
@@ -28,11 +28,11 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-test_dataset = datasets.ImageFolder(root='./coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'{base_dir}/coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-models_dir = "./models"
+models_dir = f"{base_dir}/models"
 
 # Load model
 model_paths = {
@@ -187,7 +187,7 @@ attribution_methods = {
 method_instance = attribution_methods[args.method_name](model)
 
 # Generate and save attributions
-save_dir = f'./attribution_maps/{args.model_name}/{args.method_name}'
+save_dir = f'{base_dir}/attribution_maps/{args.model_name}/{args.method_name}'
 os.makedirs(save_dir, exist_ok=True)
 
 # Process in batches

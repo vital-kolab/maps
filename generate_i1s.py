@@ -15,8 +15,8 @@ from maps_utils import create_i1_test
 num_classes = 10
 batch_size = 32
 image_size = 224
-
-device = torch.device('cpu')
+base_dir = "/scratch/smuzelle/maps"
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 transform = transforms.Compose([
     transforms.Resize((image_size, image_size)),
@@ -41,7 +41,7 @@ attribution_methods = {
 }
 
 
-models_dir = "./models"
+models_dir = f"{base_dir}/models"
 
 # Paths to saved models
 model_paths = {
@@ -94,13 +94,13 @@ for model_name, model in models_dict.items():
 print("Models successfully loaded and ready for inference!")
 
 # Custom sorting to ensure numerical order if filenames don't have leading zeros
-test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'{base_dir}/context_per_class', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 pattern_emi = re.compile(r'pEMI_(\d+)\.npy')
 
-os.makedirs('./behavioral_responses', exist_ok=True)
+os.makedirs(f'{base_dir}/context/behavioral_responses', exist_ok=True)
 
 ref_model_name = sys.argv[1]
 method_name = sys.argv[2]
@@ -113,8 +113,7 @@ for percentile in percentiles:
         target_model.eval()
         target_model.to(device)
         
-        emis_dir = f'./perturbed_images/{ref_model_name}/{method_name}/{percentile}'
-        print(os.listdir(emis_dir))
+        emis_dir = f'{base_dir}/context/perturbed_images/{ref_model_name}/{method_name}/{percentile}'
         emis_files = sorted(
             [f for f in os.listdir(emis_dir) if pattern_emi.match(f)],
             key=lambda x: int(pattern_emi.match(x).group(1))
@@ -124,7 +123,7 @@ for percentile in percentiles:
         all_outputs_target = []
 
         # Save behavioral responses and i1 scores progressively
-        response_dir = f'./behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
+        response_dir = f'{base_dir}/context/behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
         if not os.path.exists(f"{response_dir}/{target_model_name}_i1.json"):
             os.makedirs(response_dir, exist_ok=True)
             for file in emis_files:
@@ -134,9 +133,8 @@ for percentile in percentiles:
 
                 all_outputs_target.append(output_target)
 
-            print(len(all_outputs_target))
             i1_scores = {
-                'target_pEMI': create_i1_test(np.vstack(all_outputs_target)).tolist()
+                'target_pEMI': create_i1_test(np.vstack(all_outputs_target), nrImages=120).tolist()
             }
             
             with open(f'{response_dir}/{target_model_name}_behavioral.json', 'w') as f:

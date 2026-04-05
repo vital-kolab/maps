@@ -52,7 +52,25 @@ def generate_perturbed_images(input_image, attribution_map, percentile, positive
 
     return perturbed_image.transpose(2, 0, 1)
 
+def random_attr_map_like(attr_map, seed=None, dist="normal", abs_value=True):
+    rng = np.random.default_rng(seed)
+    if dist == "normal":
+        r = rng.standard_normal(size=attr_map.shape)
+    elif dist == "uniform":
+        r = rng.random(size=attr_map.shape)
+    else:
+        raise ValueError(f"Unknown dist: {dist}")
+
+    if abs_value:
+        r = np.abs(r)
+    return r.astype(np.float32)
+
+model_name = sys.argv[1]
+method_name = sys.argv[2]
+print(model_name, method_name)
 percentiles = [50, 60, 65, 70, 75, 80, 85, 90, 95, 97, 98, 99]
+
+base_dir = "/scratch/smuzelle/maps"
 
 num_classes = 10
 batch_size = 32
@@ -66,23 +84,26 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'{base_dir}/coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
-model_name = sys.argv[1]
-method_name = sys.argv[2]
+
 for percentile in percentiles:
-    save_dir = f'./perturbed_images/{model_name}/{method_name}/{percentile}'
+    save_dir = f'{base_dir}/perturbed_images/{model_name}/{method_name}/{percentile}'
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
         
         for idx, (inputs, labels) in enumerate(test_loader):
             for i in range(inputs.size(0)):
-                attr_map = np.load(f"./attribution_maps/{model_name}/{method_name}/image_{idx * test_loader.batch_size + i}.npy") 
+                if method_name == "Random":
+                    sample = np.load(f"{base_dir}/attribution_maps/{model_name}/NoiseTunnel_Saliency/image_{idx * test_loader.batch_size + i}.npy")
+                    attr_map = random_attr_map_like(sample)
+                else:
+                    attr_map = np.load(f"{base_dir}/attribution_maps/{model_name}/{method_name}/image_{idx * test_loader.batch_size + i}.npy") 
+                
                 pEMI = generate_perturbed_images(inputs[i], attr_map, percentile, positive=True)
-
                 np.save(f'{save_dir}/pEMI_{idx * test_loader.batch_size + i}.npy', pEMI)
 
     print(f"Percentile {percentile} done")

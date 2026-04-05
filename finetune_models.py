@@ -11,7 +11,8 @@ batch_size = 32
 image_size = 224
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-out_dir = "./models"
+base_dir = "."
+out_dir = f"{base_dir}/models"
 os.makedirs(out_dir, exist_ok=True)
 
 transform = transforms.Compose([
@@ -20,10 +21,10 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-train_dataset = datasets.ImageFolder(root=f'./coco1400_perclass', transform=transform)
+train_dataset = datasets.ImageFolder(root=f'{base_dir}/coco1400_perclass', transform=transform)
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-test_dataset = datasets.ImageFolder(root=f'./coco200_perclass', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'{base_dir}/coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
