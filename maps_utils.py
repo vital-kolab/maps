@@ -29,7 +29,7 @@ def create_i1_test(new_features, nrImages=200, eps=1e-5):
 
     return i1
 
-def spearman_ci_boot(x, y, n_boot=5000, ci=95, rng=None):
+def spearman_ci_boot(x, y, n_boot=5000, ci=95, rng=None, stats=False):
     x, y = np.asarray(x), np.asarray(y)
     m = np.isfinite(x) & np.isfinite(y)
     x, y = x[m], y[m]
@@ -49,7 +49,10 @@ def spearman_ci_boot(x, y, n_boot=5000, ci=95, rng=None):
     # use half-width for error bars
     err_low  = r0 - lo
     err_high = hi - r0
-    return r0, err_low, err_high
+    if stats:
+        return r0, err_low, err_high, boots
+    else:
+        return r0, err_low, err_high
 
 def get_gt_single(model1, model2, ground_truth, method_names):
     gt_ref = np.zeros((12, 200))
