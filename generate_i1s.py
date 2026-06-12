@@ -15,7 +15,7 @@ from maps_utils import create_i1_test
 num_classes = 10
 batch_size = 32
 image_size = 224
-base_dir = "/scratch/smuzelle/maps"
+base_dir = "."
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 transform = transforms.Compose([
