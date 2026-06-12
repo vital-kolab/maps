@@ -85,7 +85,7 @@ To generate all the explanations from all 11 models and 12 methods, run
 bash run_attributions.sh
 ```
 
-To visualize the resulting explanations:
+To visualize the resulting explanations (5 first cells only):
 ```bash
 jupyter notebook visualize_explanations.ipynb
 ```
@@ -105,6 +105,11 @@ As mentioned above, you can replace `convnext` with the best model evaluated ear
 To generate all the EMIs from all 11 models and 12 methods, run 
 ```bash
 bash run_emis.sh
+```
+
+To visualize the resulting EMIs (last 2 cells):
+```bash
+jupyter notebook visualize_explanations.ipynb
 ```
 
 ---
