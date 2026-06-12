@@ -70,7 +70,7 @@ method_name = sys.argv[2]
 print(model_name, method_name)
 percentiles = [50, 60, 65, 70, 75, 80, 85, 90, 95, 97, 98, 99]
 
-base_dir = "/scratch/smuzelle/maps"
+base_dir = "."
 
 num_classes = 10
 batch_size = 32
