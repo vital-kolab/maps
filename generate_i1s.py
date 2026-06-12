@@ -94,13 +94,13 @@ for model_name, model in models_dict.items():
 print("Models successfully loaded and ready for inference!")
 
 # Custom sorting to ensure numerical order if filenames don't have leading zeros
-test_dataset = datasets.ImageFolder(root=f'{base_dir}/context_per_class', transform=transform)
+test_dataset = datasets.ImageFolder(root=f'{base_dir}/coco200_perclass', transform=transform)
 test_dataset.samples.sort(key=lambda x: int(os.path.splitext(os.path.basename(x[0]))[0].replace('im', '')))
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 pattern_emi = re.compile(r'pEMI_(\d+)\.npy')
 
-os.makedirs(f'{base_dir}/context/behavioral_responses', exist_ok=True)
+os.makedirs(f'{base_dir}/behavioral_responses', exist_ok=True)
 
 ref_model_name = sys.argv[1]
 method_name = sys.argv[2]
@@ -113,7 +113,7 @@ for percentile in percentiles:
         target_model.eval()
         target_model.to(device)
         
-        emis_dir = f'{base_dir}/context/perturbed_images/{ref_model_name}/{method_name}/{percentile}'
+        emis_dir = f'{base_dir}/perturbed_images/{ref_model_name}/{method_name}/{percentile}'
         emis_files = sorted(
             [f for f in os.listdir(emis_dir) if pattern_emi.match(f)],
             key=lambda x: int(pattern_emi.match(x).group(1))
@@ -123,7 +123,7 @@ for percentile in percentiles:
         all_outputs_target = []
 
         # Save behavioral responses and i1 scores progressively
-        response_dir = f'{base_dir}/context/behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
+        response_dir = f'{base_dir}/behavioral_responses/{ref_model_name}/{method_name}/{percentile}'
         if not os.path.exists(f"{response_dir}/{target_model_name}_i1.json"):
             os.makedirs(response_dir, exist_ok=True)
             for file in emis_files:
